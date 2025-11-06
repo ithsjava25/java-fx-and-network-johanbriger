@@ -15,7 +15,7 @@ import java.net.http.HttpResponse;
  */
 public class HelloController {
 
-    private final HelloModel model = new HelloModel();
+    private final HelloModel model = new HelloModel(new NtfyConnectionImpl());
     public ListView<NtfyMessageDto> messageView;
 
     @FXML
