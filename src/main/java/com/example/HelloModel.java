@@ -1,18 +1,12 @@
 package com.example;
 
-import io.github.cdimascio.dotenv.Dotenv;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import tools.jackson.databind.ObjectMapper;
-import java.io.IOException;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Objects;
+
+import java.io.File;
 
 /**
  * Model layer: encapsulates application data and business logic.
@@ -57,12 +51,15 @@ public class HelloModel {
     public String getGreeting() {
         String javaVersion = System.getProperty("java.version");
         String javafxVersion = System.getProperty("javafx.version");
-        return "Hello, JavaFX " + javafxVersion + ", running on Java " + javaVersion + ".";
+        return "Welcome to NTFY chat";
     }
 
-    public void sendMessage() {
+    public void sendMessage(String enteredText) {
 
-        connection.send(messageToSend.get());
+        connection.send(enteredText);
+
+        //Testet:
+        //connection.send(messageToSend.get());
 
     }
 
@@ -70,6 +67,10 @@ public class HelloModel {
 
         connection.receive(m->Platform.runLater(()->messages.add(m)));
 
+    }
+
+    public boolean sendFile(File file) {
+        return connection.sendFile(file);
     }
 
 

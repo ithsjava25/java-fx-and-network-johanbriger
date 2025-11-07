@@ -4,6 +4,10 @@ import io.github.cdimascio.dotenv.Dotenv;
 import javafx.application.Platform;
 import tools.jackson.databind.ObjectMapper;
 
+import java.io.File;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -31,7 +35,7 @@ public class NtfyConnectionImpl implements NtfyConnection {
     public boolean send(String message) {
 
         HttpRequest httpRequest = HttpRequest.newBuilder()
-                .POST(HttpRequest.BodyPublishers.ofString("Hello World"))
+                .POST(HttpRequest.BodyPublishers.ofString(message))
                .uri(URI.create(hostName + "/mytopic")).build();
        try {
            var response = http.send(httpRequest, HttpResponse.BodyHandlers.ofString());
@@ -48,7 +52,7 @@ public class NtfyConnectionImpl implements NtfyConnection {
     public void receive(Consumer<NtfyMessageDto> messageHandler) {
 
         HttpRequest httpRequest =  HttpRequest.newBuilder()
-                .GET().uri(URI.create(hostName + "/brigerstopic/json")).build();
+                .GET().uri(URI.create(hostName + "/mytopic/json")).build();
 
         http.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofLines())
                 .thenAccept(response -> response.body()
@@ -57,4 +61,51 @@ public class NtfyConnectionImpl implements NtfyConnection {
                         .filter(message->message.event().equals("message"))
                         .forEach(messageHandler));
     }
+
+    @Override
+    public boolean sendFile(File file) {
+        if (file == null || !file.exists()) {
+            System.out.println("Filen är ogiltig eller saknas.");
+            return false;
+        }
+
+        try {
+            // Läs in filens innehåll som bytes
+            byte[] fileBytes = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
+
+            // Bestäm Content-Type baserat på filnamnet
+            String contentType = Files.probeContentType(file.toPath());
+            if (contentType == null) {
+                contentType = "application/octet-stream"; // Standard om typen inte hittas
+            }
+
+            HttpRequest httpRequest = HttpRequest.newBuilder()
+                    .uri(URI.create(hostName + "/mytopic"))
+                    // Ställ in rätt Content-Type för filen
+                    .header("Content-Type", contentType)
+                    // Ntfy använder Header "Filename" för att visa namnet i notisen
+                    .header("Filename", file.getName())
+                    // Skicka filens bytes som request body
+                    .POST(BodyPublishers.ofByteArray(fileBytes))
+                    .build();
+
+            var response = http.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+
+            // Kontrollera om servern svarade med en framgångsrik statuskod (t.ex. 200/201)
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                return true;
+            } else {
+                System.out.println("Fel vid sändning av fil. Statuskod: " + response.statusCode());
+                return false;
+            }
+
+        } catch (IOException e) {
+            System.out.println("Error reading or sending file: " + e.getMessage());
+        } catch (InterruptedException e) {
+            System.out.println("Interrupted while sending file");
+            Thread.currentThread().interrupt();
+        }
+        return false;
+    }
+
 }
