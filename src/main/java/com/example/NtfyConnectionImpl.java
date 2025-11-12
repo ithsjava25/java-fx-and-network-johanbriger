@@ -3,7 +3,6 @@ package com.example;
 import io.github.cdimascio.dotenv.Dotenv;
 import javafx.application.Platform;
 import tools.jackson.databind.ObjectMapper;
-
 import java.io.File;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.file.Files;
@@ -26,7 +25,7 @@ public class NtfyConnectionImpl implements NtfyConnection {
         Dotenv dotenv = Dotenv.load();
         hostName = Objects.requireNonNull(dotenv.get("HOST_NAME"));
     }
-    //Vid test
+
     public NtfyConnectionImpl(String hostName) {
         this.hostName = hostName;
     }
@@ -70,10 +69,9 @@ public class NtfyConnectionImpl implements NtfyConnection {
         }
 
         try {
-            // Läs in filens innehåll som bytes
+
             byte[] fileBytes = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
 
-            // Bestäm Content-Type baserat på filnamnet
             String contentType = Files.probeContentType(file.toPath());
             if (contentType == null) {
                 contentType = "application/octet-stream"; // Standard om typen inte hittas
@@ -81,17 +79,13 @@ public class NtfyConnectionImpl implements NtfyConnection {
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(URI.create(hostName + "/mytopic"))
-                    // Ställ in rätt Content-Type för filen
                     .header("Content-Type", contentType)
-                    // Ntfy använder Header "Filename" för att visa namnet i notisen
                     .header("Filename", file.getName())
-                    // Skicka filens bytes som request body
                     .POST(BodyPublishers.ofByteArray(fileBytes))
                     .build();
 
             var response = http.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
-            // Kontrollera om servern svarade med en framgångsrik statuskod (t.ex. 200/201)
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
                 return true;
             } else {

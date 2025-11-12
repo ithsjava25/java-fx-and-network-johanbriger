@@ -8,20 +8,12 @@ import javafx.collections.ObservableList;
 
 import java.io.File;
 
-/**
- * Model layer: encapsulates application data and business logic.
- */
+
 public class HelloModel {
 
     private final NtfyConnection connection;
     private final ObservableList<NtfyMessageDto> messages = FXCollections.observableArrayList();
     private final StringProperty messageToSend = new SimpleStringProperty();
-
-
-    public HelloModel(NtfyConnection connection, String hostName) {
-        this.connection = connection;
-
-    }
 
 
     public HelloModel(NtfyConnection connection) {
@@ -33,40 +25,21 @@ public class HelloModel {
         return messages;
     }
 
-    public String getMessageToSend() {
-        return messageToSend.get();
-    }
-
-    public StringProperty messageToSendProperty() {
-        return messageToSend;
-    }
-
     public void setMessageToSend(String message) {
         messageToSend.set(message);
     }
 
-    /**
-     * Returns a greeting based on the current Java and JavaFX versions.
-     */
+
     public String getGreeting() {
-        String javaVersion = System.getProperty("java.version");
-        String javafxVersion = System.getProperty("javafx.version");
         return "Welcome to NTFY chat";
     }
 
     public void sendMessage(String enteredText) {
-
         connection.send(enteredText);
-
-        //Testet:
-        //connection.send(messageToSend.get());
-
     }
 
     public void receiveMessage() {
-
         connection.receive(m->Platform.runLater(()->messages.add(m)));
-
     }
 
     public boolean sendFile(File file) {

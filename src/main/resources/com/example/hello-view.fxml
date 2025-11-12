@@ -9,6 +9,7 @@
 <?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.image.ImageView?>
 <BorderPane prefHeight="500.0" prefWidth="600.0"
             xmlns="http://javafx.com/javafx/21"
             xmlns:fx="http://javafx.com/fxml/1"
@@ -19,6 +20,7 @@
             <padding>
                 <Insets bottom="5.0" left="10.0" right="10.0" top="5.0" />
             </padding>
+            <ImageView fx:id="ntfyIcon" fitHeight="20" fitWidth="20" />
             <Label fx:id="messageLabel" text="Statusmeddelanden visas här." />
         </VBox>
     </top>
