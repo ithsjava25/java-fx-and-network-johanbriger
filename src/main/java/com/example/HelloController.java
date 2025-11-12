@@ -41,6 +41,7 @@ public class HelloController {
         messageView.setItems(model.getMessages());
 
         messageView.setCellFactory(lv -> new ListCell<NtfyMessageDto>() {
+
             @Override
             protected void updateItem(NtfyMessageDto item, boolean empty) {
                 super.updateItem(item, empty);
