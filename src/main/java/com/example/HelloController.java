@@ -29,6 +29,11 @@ public class HelloController {
     @FXML
     private File selectedFile;
 
+    /**
+     * Initializes the controller's UI: sets the ntfy icon, applies the model greeting, binds the message list, and configures how messages are displayed.
+     *
+     * <p>Each list item is shown in the format "[topic] message".</p>
+     */
     @FXML
     private void initialize() {
 
@@ -58,6 +63,12 @@ public class HelloController {
 
     }
 
+    /**
+     * Opens a file chooser dialog, stores the chosen file in {@code selectedFile}, and updates {@code messageLabel} to reflect whether a file was selected.
+     *
+     * The dialog is titled "Välj en fil att bifoga" and is shown using the window from {@code messageLabel}'s scene as the owner.
+     * If a file is selected, {@code messageLabel} is set to "Fil vald: <filename>"; otherwise it is set to "Ingen fil vald.".
+     */
     @FXML
     private void handleAttachFile() {
         FileChooser fileChooser = new FileChooser();
@@ -74,6 +85,15 @@ public class HelloController {
         }
     }
 
+    /**
+     * Send either the currently selected file or the text entered in the input field.
+     *
+     * <p>If a file is selected, attempts to send that file and updates {@code messageLabel} to indicate
+     * success or failure; on success the selected file reference is cleared. If no file is selected,
+     * trims the input text and, if non-empty, sends the trimmed text and clears the input field.
+     * If the trimmed text is empty, logs "Meddelandet är tomt" to standard output and sets
+     * {@code messageLabel} to prompt the user for input.
+     */
     public void sendMessage() {
 
         if (selectedFile != null) {

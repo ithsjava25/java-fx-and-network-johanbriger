@@ -21,15 +21,31 @@ public class NtfyConnectionImpl implements NtfyConnection {
     private final String hostName;
     private final ObjectMapper mapper = new ObjectMapper();
 
+    /**
+     * Initializes a NtfyConnectionImpl by reading the HOST_NAME environment variable.
+     *
+     * @throws NullPointerException if the HOST_NAME environment variable is not set
+     */
     public NtfyConnectionImpl() {
         Dotenv dotenv = Dotenv.load();
         hostName = Objects.requireNonNull(dotenv.get("HOST_NAME"));
     }
 
+    /**
+     * Creates a NtfyConnectionImpl configured to communicate with the specified host.
+     *
+     * @param hostName the base URL or host of the ntfy server (including scheme, e.g. "https://example.com")
+     */
     public NtfyConnectionImpl(String hostName) {
         this.hostName = hostName;
     }
 
+    /**
+     * Send a text payload to the configured "mytopic" endpoint.
+     *
+     * @param message the message body to send
+     * @return `true` if the message was sent successfully, `false` otherwise
+     */
     @Override
     public boolean send(String message) {
 
@@ -47,6 +63,13 @@ public class NtfyConnectionImpl implements NtfyConnection {
         return false;
     }
 
+    /**
+     * Streams incoming topic messages and forwards each message event to the supplied handler.
+     *
+     * Only messages whose `event` equals "message" are passed to the handler.
+     *
+     * @param messageHandler consumer invoked for each received NtfyMessageDto with `event` equal to "message"
+     */
     @Override
     public void receive(Consumer<NtfyMessageDto> messageHandler) {
 
@@ -61,6 +84,16 @@ public class NtfyConnectionImpl implements NtfyConnection {
                         .forEach(messageHandler));
     }
 
+    /**
+     * Uploads the given file to the configured topic endpoint.
+     *
+     * Attempts to read the file, determine its content type (defaults to "application/octet-stream"
+     * if unknown), and POST the file bytes to "{hostName}/mytopic" with headers for Content-Type and Filename.
+     *
+     * @param file the file to upload; must exist
+     * @return `true` if the server responded with a 2xx status code, `false` otherwise (including when the file
+     *         is invalid, an I/O error occurs, or the operation is interrupted)
+     */
     @Override
     public boolean sendFile(File file) {
         if (file == null || !file.exists()) {
