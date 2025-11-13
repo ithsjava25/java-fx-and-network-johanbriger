@@ -5,9 +5,26 @@ import java.util.function.Consumer;
 
 public interface NtfyConnection {
 
-    boolean send(String message);
+    /**
+ * Send a text message through this connection.
+ *
+ * @param message the message payload to send
+ * @return `true` if the message was sent successfully, `false` otherwise
+ */
+boolean send(String message);
 
-    void receive(Consumer<NtfyMessageDto> messageHandler);
+    /**
+ * Registers a handler to be invoked for each incoming NtfyMessageDto.
+ *
+ * @param messageHandler the consumer to be called with each received message
+ */
+void receive(Consumer<NtfyMessageDto> messageHandler);
 
-    boolean sendFile(File file);
+    /**
+ * Sends the given file over this connection.
+ *
+ * @param file the file to send
+ * @return `true` if the file was sent successfully, `false` otherwise
+ */
+boolean sendFile(File file);
 }
