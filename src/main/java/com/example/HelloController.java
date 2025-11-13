@@ -1,15 +1,17 @@
 package com.example;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.*;
 import javafx.scene.control.Label;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.awt.*;
 import java.io.File;
+import java.net.URI;
 
 
 public class HelloController {
@@ -52,9 +54,26 @@ public class HelloController {
                     String displayText = String.format("[%s] %s", item.topic(), item.message());
                     setText(displayText);
 
+                    if (item.attachmentUrl() != null && !item.attachmentUrl().isEmpty()) {
+                        Hyperlink downloadLink = new Hyperlink("Ladda ner fil");
+                        downloadLink.setOnAction(e -> {
+                            try {
+                                Desktop.getDesktop().browse(new URI(item.attachmentUrl()));
+                            } catch (Exception ex) {
+                                Alert alert = new Alert(Alert.AlertType.ERROR);
+                                alert.setTitle("Error Opening Link");
+                                alert.setContentText("Could not open attachment: " + ex.getMessage());
+                                alert.showAndWait();
+                            }
+                        });
+                        setGraphic(downloadLink);
+                    }
+
                 }
             }
         });
+
+
 
     }
 
