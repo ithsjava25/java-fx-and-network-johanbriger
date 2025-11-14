@@ -121,7 +121,7 @@ public class HelloController {
             messageLabel.setText("Vänligen skriv ett meddelande.");
             return;
         }
-        enteredText = enteredText.trim();
+
         model.sendMessage(enteredText);
 
         inputField.clear();

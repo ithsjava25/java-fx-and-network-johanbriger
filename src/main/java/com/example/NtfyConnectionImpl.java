@@ -1,12 +1,11 @@
 package com.example;
 
 import io.github.cdimascio.dotenv.Dotenv;
-import javafx.application.Platform;
 import tools.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.net.http.HttpRequest.BodyPublishers;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -61,8 +60,16 @@ public class NtfyConnectionImpl implements NtfyConnection {
 
         http.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofLines())
                 .thenAccept(response -> response.body()
-                        .map(s ->  mapper.readValue(s, NtfyMessageDto.class))
-
+                        .map(s ->  {
+                            try {
+                                return mapper.readValue(s, NtfyMessageDto.class);
+                            } catch (Exception e) {
+                                // Logga felet som inträffade vid JSON-parsning
+                                System.err.println("JSON parsing error: " + e.getMessage());
+                                return null; // Returnera null vid parsningsfel
+                            }
+                        })
+                        .filter(java.util.Objects::nonNull)
                         .peek(System.out::println)
                         .filter(message->message.event().equals("message"))
                         .forEach(messageHandler));
@@ -70,30 +77,32 @@ public class NtfyConnectionImpl implements NtfyConnection {
 
     @Override
     public boolean sendFile(File file) {
-        if (file == null || !file.exists()) {
+        if (file == null || !file.exists() || file.isDirectory()) {
             System.out.println("Filen är ogiltig eller saknas.");
             return false;
         }
 
+        Path filePath = file.toPath();
+
         try {
 
-            byte[] fileBytes = Files.readAllBytes(Paths.get(file.getAbsolutePath()));
 
             String contentType = Files.probeContentType(file.toPath());
             if (contentType == null) {
-                contentType = "application/octet-stream"; // Standard om typen inte hittas
+                contentType = "application/octet-stream";
             }
 
             HttpRequest httpRequest = HttpRequest.newBuilder()
                     .uri(URI.create(hostName + "/mytopic"))
                     .header("Content-Type", contentType)
                     .header("Filename", file.getName())
-                    .POST(BodyPublishers.ofByteArray(fileBytes))
+                    .POST(BodyPublishers.ofFile(filePath))
                     .build();
 
             var response = http.send(httpRequest, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                System.out.println("Filen skickades");
                 return true;
             } else {
                 System.out.println("Fel vid sändning av fil. Statuskod: " + response.statusCode());
