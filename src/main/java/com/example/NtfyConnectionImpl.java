@@ -36,13 +36,19 @@ public class NtfyConnectionImpl implements NtfyConnection {
         HttpRequest httpRequest = HttpRequest.newBuilder()
                 .POST(HttpRequest.BodyPublishers.ofString(message))
                .uri(URI.create(hostName + "/mytopic")).build();
-       try {
-           var response = http.send(httpRequest, HttpResponse.BodyHandlers.ofString());
-           return true;
+        try {
+            var response = http.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+            if (response.statusCode() >= 200 && response.statusCode() < 300) {
+                return true;
+            } else {
+                System.out.println("Error sending message. Status code: " + response.statusCode());
+                return false;
+            }
         } catch (IOException e) {
             System.out.println("Error sending message");
         } catch (InterruptedException e) {
            System.out.println("Interrupted while sending message");
+            Thread.currentThread().interrupt();
         }
         return false;
     }
@@ -56,6 +62,7 @@ public class NtfyConnectionImpl implements NtfyConnection {
         http.sendAsync(httpRequest, HttpResponse.BodyHandlers.ofLines())
                 .thenAccept(response -> response.body()
                         .map(s ->  mapper.readValue(s, NtfyMessageDto.class))
+
                         .peek(System.out::println)
                         .filter(message->message.event().equals("message"))
                         .forEach(messageHandler));

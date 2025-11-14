@@ -8,5 +8,7 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
         public String attachmentUrl() {
             return attachment != null ? attachment.url() : null;
         }
+
+
     }
 

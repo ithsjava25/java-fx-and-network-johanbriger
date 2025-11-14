@@ -27,7 +27,7 @@ class HelloModelTest {
     }
 
     @Test
-    @DisplayName("When calling sendMessage it should call connection send")
+    @DisplayName("When calling sendMessage it should send to the fake server")
     void sendMessageToFakeServer(WireMockRuntimeInfo wmRuntimeInfo){
         var com = new NtfyConnectionImpl("http://localhost:" + wmRuntimeInfo.getHttpPort());
         var model = new HelloModel(com);

@@ -8,7 +8,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-
 import java.awt.*;
 import java.io.File;
 import java.net.URI;
@@ -17,6 +16,7 @@ import java.net.URI;
 public class HelloController {
 
     private final HelloModel model = new HelloModel(new NtfyConnectionImpl());
+    @FXML
     public ListView<NtfyMessageDto> messageView;
 
     @FXML
@@ -28,7 +28,7 @@ public class HelloController {
     @FXML
     private Label messageLabel;
 
-    @FXML
+
     private File selectedFile;
 
     @FXML
@@ -50,6 +50,7 @@ public class HelloController {
 
                 if (empty || item == null) {
                     setText(null);
+                    setGraphic(null);
                 } else {
                     String displayText = String.format("[%s] %s", item.topic(), item.message());
                     setText(displayText);
@@ -69,20 +70,25 @@ public class HelloController {
                         setGraphic(downloadLink);
                     }
 
+
                 }
             }
         });
-
-
-
     }
+
+    
 
     @FXML
     private void handleAttachFile() {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Välj en fil att bifoga");
 
-        Stage stage = (Stage) messageLabel.getScene().getWindow();
+        var scene = messageLabel.getScene();
+        if (scene == null || scene.getWindow() == null) {
+            messageLabel.setText("Fel: Fönster ej tillgängligt.");
+            return;
+        }
+        Stage stage = (Stage) scene.getWindow();
 
         selectedFile = fileChooser.showOpenDialog(stage);
 
@@ -107,7 +113,6 @@ public class HelloController {
             }
             return;
         }
-
 
         String enteredText = inputField.getText().trim();
 

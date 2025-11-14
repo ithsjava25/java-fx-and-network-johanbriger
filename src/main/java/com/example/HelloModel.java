@@ -7,6 +7,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 import java.io.File;
+import java.util.Objects;
 
 
 public class HelloModel {
@@ -17,7 +18,7 @@ public class HelloModel {
 
 
     public HelloModel(NtfyConnection connection) {
-        this.connection = connection;
+        this.connection = Objects.requireNonNull(connection, "connection must not be null");
         receiveMessage();
     }
 
