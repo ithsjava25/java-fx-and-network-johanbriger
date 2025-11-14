@@ -68,6 +68,8 @@ public class HelloController {
                             }
                         });
                         setGraphic(downloadLink);
+                    }else  {
+                        setGraphic(null);
                     }
 
 
